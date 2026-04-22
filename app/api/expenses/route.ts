@@ -1,4 +1,4 @@
-import { expenseStore, IdempotencyConflictError } from "@/lib/expense-store";
+import { expenseStore } from "@/lib/expense-store";
 
 type CreateExpenseRequest = {
   amount: number;
@@ -34,11 +34,14 @@ export async function POST(request: Request) {
 
     return Response.json(expense, { status: 201 });
   } catch (error) {
-    if (error instanceof IdempotencyConflictError) {
-      return Response.json({ error: error.message }, { status: 409 });
+    if (error instanceof Error && error.message === "IDEMPOTENCY_CONFLICT") {
+      return Response.json(
+        { error: "Idempotency key reused with different payload" },
+        { status: 409 },
+      );
     }
 
-    throw error;
+    return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 

@@ -21,7 +21,7 @@ type IdempotencyRecord = {
 
 export class IdempotencyConflictError extends Error {
   constructor() {
-    super("Idempotency key has already been used with a different payload.");
+    super("IDEMPOTENCY_CONFLICT");
     this.name = "IdempotencyConflictError";
   }
 }
