@@ -46,6 +46,14 @@ This allows the API to handle retries and duplicate submissions safely:
 
 This behavior is especially useful for real-world conditions such as slow networks, repeated button clicks, or client-side retries after a timeout. In this implementation, the idempotency store is intentionally in-memory to keep the assignment lightweight, which means the protection only lasts for the lifetime of the running server process.
 
+## Design Decisions and Trade-offs
+
+This project uses an in-memory store for both expense data and idempotency tracking. That choice was made deliberately to keep the implementation small, fast to build, and easy to review within the scope of the assignment. It allowed the work to focus on API behavior, validation, idempotent request handling, and frontend interaction without adding database setup or operational complexity.
+
+This approach does have important limitations. Because the app is deployed on Vercel in a serverless environment, in-memory state is not durable across cold starts, redeploys, or multiple instances. In practice, that means both expense data and idempotency keys only exist for the lifetime of a single running instance. The behavior is sufficient for demonstrating the assignment requirements, but it should not be treated as production-grade persistence.
+
+In a production system, this would be replaced with persistent infrastructure. A relational database such as PostgreSQL would be a strong choice for storing expenses durably, and idempotency records could be stored either in PostgreSQL or in a dedicated fast store such as Redis. That would make the system resilient across restarts and horizontally scaled instances while preserving the same idempotent API contract.
+
 ## Setup Instructions
 
 ### Prerequisites
