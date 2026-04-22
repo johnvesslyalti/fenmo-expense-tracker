@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const expense = expenseStore.create(
       {
         amount: body.amount,
-        category: body.category.trim(),
+        category: body.category.trim().toLowerCase(),
         description: body.description.trim(),
         date: body.date,
       },
@@ -82,7 +82,6 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
-  const sort = searchParams.get("sort");
 
   let expenses = expenseStore.list();
 
@@ -93,14 +92,12 @@ export async function GET(request: Request) {
     );
   }
 
-  if (sort === "date") {
-    expenses = [...expenses].sort((firstExpense, secondExpense) => {
-      return (
-        new Date(secondExpense.date).getTime() -
-        new Date(firstExpense.date).getTime()
-      );
-    });
-  }
+  expenses = [...expenses].sort((firstExpense, secondExpense) => {
+    return (
+      new Date(secondExpense.date).getTime() -
+      new Date(firstExpense.date).getTime()
+    );
+  });
 
   return Response.json(expenses);
 }
