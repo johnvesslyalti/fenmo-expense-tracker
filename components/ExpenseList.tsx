@@ -53,10 +53,24 @@ export function ExpenseList({ refreshTrigger = 0 }: ExpenseListProps) {
     firstCategory.localeCompare(secondCategory),
   );
 
-  const visibleExpenses =
+  const visibleExpenses = (
     selectedCategory === "all"
       ? expenses
-      : expenses.filter((expense) => expense.category === selectedCategory);
+      : expenses.filter((expense) => expense.category === selectedCategory)
+  ).toSorted((firstExpense, secondExpense) => {
+    const dateDifference =
+      new Date(secondExpense.date).getTime() -
+      new Date(firstExpense.date).getTime();
+
+    if (dateDifference !== 0) {
+      return dateDifference;
+    }
+
+    return (
+      new Date(secondExpense.createdAt).getTime() -
+      new Date(firstExpense.createdAt).getTime()
+    );
+  });
 
   const visibleTotal = visibleExpenses.reduce((total, expense) => {
     return total + expense.amount;
