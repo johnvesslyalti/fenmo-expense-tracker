@@ -27,7 +27,11 @@ export async function POST(request: Request) {
     );
   }
 
-  if (typeof body.amount !== "number" || body.amount <= 0) {
+  if (typeof body.amount !== "number" || !Number.isFinite(body.amount)) {
+    return Response.json({ error: "Invalid amount" }, { status: 400 });
+  }
+
+  if (body.amount <= 0) {
     return Response.json(
       { error: "Amount must be greater than 0." },
       { status: 400 },
