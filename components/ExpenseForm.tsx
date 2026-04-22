@@ -9,6 +9,10 @@ type ExpenseFormData = {
   date: string;
 };
 
+type ExpenseFormProps = {
+  onSuccess?: () => void;
+};
+
 const initialFormData: ExpenseFormData = {
   amount: "",
   category: "",
@@ -16,7 +20,7 @@ const initialFormData: ExpenseFormData = {
   date: "",
 };
 
-export function ExpenseForm() {
+export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
   const [formData, setFormData] = useState<ExpenseFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -64,6 +68,7 @@ export function ExpenseForm() {
 
       setFormData(initialFormData);
       keyRef.current = null;
+      onSuccess?.();
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to create expense.",
