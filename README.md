@@ -52,6 +52,8 @@ This project uses an in-memory store for both expense data and idempotency track
 
 This approach does have important limitations. Because the app is deployed on Vercel in a serverless environment, in-memory state is not durable across cold starts, redeploys, or multiple instances. In practice, that means both expense data and idempotency keys only exist for the lifetime of a single running instance. The behavior is sufficient for demonstrating the assignment requirements, but it should not be treated as production-grade persistence.
 
+Because the app is deployed on Vercel (serverless), both data and idempotency guarantees are limited to a single instance and are not durable across cold starts or multiple concurrent instances.
+
 In a production system, this would be replaced with persistent infrastructure. A relational database such as PostgreSQL would be a strong choice for storing expenses durably, and idempotency records could be stored either in PostgreSQL or in a dedicated fast store such as Redis. That would make the system resilient across restarts and horizontally scaled instances while preserving the same idempotent API contract.
 
 ## API Endpoints

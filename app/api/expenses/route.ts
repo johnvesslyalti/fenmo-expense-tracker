@@ -12,7 +12,7 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 function isValidDateString(value: unknown): value is string {
-  return typeof value === "string" && !Number.isNaN(new Date(value).getTime());
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
 export async function POST(request: Request) {
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
   if (!isValidDateString(body.date)) {
     return Response.json(
-      { error: "Date must be a valid date string." },
+      { error: "Date must be in YYYY-MM-DD format" },
       { status: 400 },
     );
   }
