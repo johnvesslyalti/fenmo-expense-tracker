@@ -7,6 +7,15 @@ export type Expense = {
   createdAt: string;
 };
 
+type StoredExpense = {
+  id: string;
+  amountInCents: number;
+  category: string;
+  description: string;
+  date: string;
+  createdAt: string;
+};
+
 export type CreateExpenseInput = {
   amount: number;
   category: string;
@@ -15,7 +24,7 @@ export type CreateExpenseInput = {
 };
 
 type IdempotencyRecord = {
-  expense: Expense;
+  expense: StoredExpense;
   payload: string;
 };
 
@@ -27,20 +36,32 @@ export class IdempotencyConflictError extends Error {
 }
 
 class ExpenseStore {
-  private expenses: Expense[] = [];
+  private expenses: StoredExpense[] = [];
 
   private idempotencyKeys = new Map<string, IdempotencyRecord>();
 
   list(): Expense[] {
-    return [...this.expenses];
+    return this.expenses.map((expense) => this.toPublicExpense(expense));
   }
 
   findById(id: string): Expense | undefined {
-    return this.expenses.find((expense) => expense.id === id);
+    const expense = this.expenses.find((currentExpense) => currentExpense.id === id);
+
+    if (!expense) {
+      return undefined;
+    }
+
+    return this.toPublicExpense(expense);
   }
 
   findByIdempotencyKey(key: string): Expense | undefined {
-    return this.idempotencyKeys.get(key)?.expense;
+    const expense = this.idempotencyKeys.get(key)?.expense;
+
+    if (!expense) {
+      return undefined;
+    }
+
+    return this.toPublicExpense(expense);
   }
 
   create(input: CreateExpenseInput, idempotencyKey?: string): Expense {
@@ -54,13 +75,13 @@ class ExpenseStore {
           throw new IdempotencyConflictError();
         }
 
-        return existingRecord.expense;
+        return this.toPublicExpense(existingRecord.expense);
       }
     }
 
-    const expense: Expense = {
+    const expense: StoredExpense = {
       id: crypto.randomUUID(),
-      amount: input.amount,
+      amountInCents: Math.round(input.amount * 100),
       category: input.category,
       description: input.description,
       date: input.date,
@@ -76,12 +97,23 @@ class ExpenseStore {
       });
     }
 
-    return expense;
+    return this.toPublicExpense(expense);
   }
 
   clear(): void {
     this.expenses = [];
     this.idempotencyKeys.clear();
+  }
+
+  private toPublicExpense(expense: StoredExpense): Expense {
+    return {
+      id: expense.id,
+      amount: expense.amountInCents / 100,
+      category: expense.category,
+      description: expense.description,
+      date: expense.date,
+      createdAt: expense.createdAt,
+    };
   }
 }
 
