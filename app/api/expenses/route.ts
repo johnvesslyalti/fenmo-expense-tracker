@@ -7,6 +7,14 @@ type CreateExpenseRequest = {
   date: string;
 };
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isValidDateString(value: unknown): value is string {
+  return typeof value === "string" && !Number.isNaN(new Date(value).getTime());
+}
+
 export async function POST(request: Request) {
   let body: CreateExpenseRequest;
 
@@ -26,9 +34,35 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!isNonEmptyString(body.category)) {
+    return Response.json(
+      { error: "Category must be a non-empty string." },
+      { status: 400 },
+    );
+  }
+
+  if (!isNonEmptyString(body.description)) {
+    return Response.json(
+      { error: "Description must be a non-empty string." },
+      { status: 400 },
+    );
+  }
+
+  if (!isValidDateString(body.date)) {
+    return Response.json(
+      { error: "Date must be a valid date string." },
+      { status: 400 },
+    );
+  }
+
   try {
     const expense = expenseStore.create(
-      body,
+      {
+        amount: body.amount,
+        category: body.category.trim(),
+        description: body.description.trim(),
+        date: body.date,
+      },
       request.headers.get("Idempotency-Key") ?? undefined,
     );
 
