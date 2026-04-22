@@ -30,3 +30,29 @@ export async function POST(request: Request) {
 
   return Response.json(expense, { status: 201 });
 }
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const category = searchParams.get("category");
+  const sort = searchParams.get("sort");
+
+  let expenses = expenseStore.list();
+
+  if (category) {
+    const normalizedCategory = category.toLowerCase();
+    expenses = expenses.filter(
+      (expense) => expense.category.toLowerCase() === normalizedCategory,
+    );
+  }
+
+  if (sort === "date") {
+    expenses = [...expenses].sort((firstExpense, secondExpense) => {
+      return (
+        new Date(secondExpense.date).getTime() -
+        new Date(firstExpense.date).getTime()
+      );
+    });
+  }
+
+  return Response.json(expenses);
+}
