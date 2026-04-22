@@ -63,5 +63,5 @@ Bruno request files for the API are available in the local Bruno collection dire
 
 ## Live Demo
 
-- Live app: `Add deployed URL here`
-- Repository: `Add repository URL here`
+- Live app: `https://johnvesslyalti-fenmo-expense-tracker.vercel.app`
+- Repository: `https://github.com/johnvesslyalti/fenmo-expense-tracker`
