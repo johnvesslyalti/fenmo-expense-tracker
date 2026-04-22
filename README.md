@@ -30,6 +30,22 @@ The application is designed around a small but production-minded API surface. It
 - Handle duplicate create requests with idempotency keys
 - Simulate slow API responses to test loading and retry behavior
 
+## Idempotency
+
+The `POST /api/expenses` endpoint supports idempotent creation through the `Idempotency-Key` request header.
+
+On the backend, idempotency keys are stored in memory alongside:
+
+- the previously created expense
+- a serialized representation of the original request payload
+
+This allows the API to handle retries and duplicate submissions safely:
+
+- If the same `Idempotency-Key` is reused with the same payload, the API returns the existing expense instead of creating a duplicate record.
+- If the same `Idempotency-Key` is reused with a different payload, the API returns a `409 Conflict` response.
+
+This behavior is especially useful for real-world conditions such as slow networks, repeated button clicks, or client-side retries after a timeout. In this implementation, the idempotency store is intentionally in-memory to keep the assignment lightweight, which means the protection only lasts for the lifetime of the running server process.
+
 ## Setup Instructions
 
 ### Prerequisites
