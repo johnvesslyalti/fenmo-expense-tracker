@@ -14,10 +14,22 @@ export type CreateExpenseInput = {
   date: string;
 };
 
+type IdempotencyRecord = {
+  expense: Expense;
+  payload: string;
+};
+
+export class IdempotencyConflictError extends Error {
+  constructor() {
+    super("Idempotency key has already been used with a different payload.");
+    this.name = "IdempotencyConflictError";
+  }
+}
+
 class ExpenseStore {
   private expenses: Expense[] = [];
 
-  private idempotencyKeys = new Map<string, Expense>();
+  private idempotencyKeys = new Map<string, IdempotencyRecord>();
 
   list(): Expense[] {
     return [...this.expenses];
@@ -28,15 +40,21 @@ class ExpenseStore {
   }
 
   findByIdempotencyKey(key: string): Expense | undefined {
-    return this.idempotencyKeys.get(key);
+    return this.idempotencyKeys.get(key)?.expense;
   }
 
   create(input: CreateExpenseInput, idempotencyKey?: string): Expense {
-    if (idempotencyKey) {
-      const existingExpense = this.idempotencyKeys.get(idempotencyKey);
+    const payload = JSON.stringify(input);
 
-      if (existingExpense) {
-        return existingExpense;
+    if (idempotencyKey) {
+      const existingRecord = this.idempotencyKeys.get(idempotencyKey);
+
+      if (existingRecord) {
+        if (existingRecord.payload !== payload) {
+          throw new IdempotencyConflictError();
+        }
+
+        return existingRecord.expense;
       }
     }
 
@@ -52,7 +70,10 @@ class ExpenseStore {
     this.expenses.push(expense);
 
     if (idempotencyKey) {
-      this.idempotencyKeys.set(idempotencyKey, expense);
+      this.idempotencyKeys.set(idempotencyKey, {
+        expense,
+        payload,
+      });
     }
 
     return expense;

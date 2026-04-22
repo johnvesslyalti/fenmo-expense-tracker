@@ -1,4 +1,4 @@
-import { expenseStore } from "@/lib/expense-store";
+import { expenseStore, IdempotencyConflictError } from "@/lib/expense-store";
 
 type CreateExpenseRequest = {
   amount: number;
@@ -26,9 +26,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const expense = expenseStore.create(body, request.headers.get("Idempotency-Key") ?? undefined);
+  try {
+    const expense = expenseStore.create(
+      body,
+      request.headers.get("Idempotency-Key") ?? undefined,
+    );
 
-  return Response.json(expense, { status: 201 });
+    return Response.json(expense, { status: 201 });
+  } catch (error) {
+    if (error instanceof IdempotencyConflictError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+
+    throw error;
+  }
 }
 
 export async function GET(request: Request) {
