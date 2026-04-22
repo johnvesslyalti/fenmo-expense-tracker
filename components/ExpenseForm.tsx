@@ -81,32 +81,40 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-xl flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+      className="flex w-full flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:shadow-cyan-500/10"
     >
-      <div className="flex flex-col gap-2">
+      <h2 className="text-lg font-semibold text-white drop-shadow-sm">Add New Expense</h2>
+
+      <div className="flex flex-col gap-1.5">
         <label
           htmlFor="amount"
-          className="text-sm font-medium text-zinc-800 dark:text-zinc-100"
+          className="text-sm font-medium text-slate-300"
         >
           Amount
         </label>
-        <input
-          id="amount"
-          name="amount"
-          type="number"
-          min="0.01"
-          step="0.01"
-          value={formData.amount}
-          onChange={handleChange}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400"
-          required
-        />
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <span className="text-slate-400 sm:text-sm">$</span>
+          </div>
+          <input
+            id="amount"
+            name="amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={formData.amount}
+            onChange={handleChange}
+            placeholder="0.00"
+            className="block w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-7 pr-3 text-sm text-white placeholder:text-slate-400 backdrop-blur-md transition-all focus:border-cyan-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+            required
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         <label
           htmlFor="category"
-          className="text-sm font-medium text-zinc-800 dark:text-zinc-100"
+          className="text-sm font-medium text-slate-300"
         >
           Category
         </label>
@@ -116,15 +124,16 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
           type="text"
           value={formData.category}
           onChange={handleChange}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400"
+          placeholder="e.g. Food, Transport"
+          className="block w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-400 backdrop-blur-md transition-all focus:border-cyan-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
           required
         />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         <label
           htmlFor="description"
-          className="text-sm font-medium text-zinc-800 dark:text-zinc-100"
+          className="text-sm font-medium text-slate-300"
         >
           Description
         </label>
@@ -133,15 +142,17 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
           name="description"
           value={formData.description}
           onChange={handleChange}
-          className="min-h-24 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none placeholder:text-zinc-400 focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400"
+          placeholder="Brief description"
+          rows={3}
+          className="block w-full resize-none rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-400 backdrop-blur-md transition-all focus:border-cyan-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
           required
         />
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         <label
           htmlFor="date"
-          className="text-sm font-medium text-zinc-800 dark:text-zinc-100"
+          className="text-sm font-medium text-slate-300"
         >
           Date
         </label>
@@ -151,21 +162,23 @@ export function ExpenseForm({ onSuccess }: ExpenseFormProps) {
           type="date"
           value={formData.date}
           onChange={handleChange}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:[color-scheme:dark] dark:focus:border-zinc-400"
+          className="block w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white backdrop-blur-md transition-all focus:border-cyan-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/20 [color-scheme:dark]"
           required
         />
       </div>
 
       {errorMessage ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400 backdrop-blur-md">
+          {errorMessage}
+        </div>
       ) : null}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-500 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-300"
+        className="mt-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
       >
-        {isSubmitting ? "Saving..." : "Add expense"}
+        {isSubmitting ? "Saving..." : "Add Expense"}
       </button>
     </form>
   );
