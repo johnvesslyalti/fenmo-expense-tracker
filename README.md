@@ -54,6 +54,80 @@ This approach does have important limitations. Because the app is deployed on Ve
 
 In a production system, this would be replaced with persistent infrastructure. A relational database such as PostgreSQL would be a strong choice for storing expenses durably, and idempotency records could be stored either in PostgreSQL or in a dedicated fast store such as Redis. That would make the system resilient across restarts and horizontally scaled instances while preserving the same idempotent API contract.
 
+## API Endpoints
+
+### `POST /api/expenses`
+
+Creates a new expense entry.
+
+**Headers**
+
+- `Content-Type: application/json`
+- `Idempotency-Key: <unique-key>`
+
+**Request body**
+
+```json
+{
+  "amount": 24.5,
+  "category": "food",
+  "description": "Lunch bowl",
+  "date": "2026-04-22"
+}
+```
+
+**Behavior**
+
+- Validates the request body before creating an expense
+- Converts the submitted amount into integer cents internally for safer money handling
+- Stores expenses in memory
+- Uses the `Idempotency-Key` header to prevent duplicate expense creation
+
+**Idempotency behavior**
+
+- Same key + same payload: returns the previously created expense
+- Same key + different payload: returns `409 Conflict`
+
+**Response codes**
+
+- `201 Created`: expense created successfully
+- `400 Bad Request`: invalid JSON or failed validation
+- `409 Conflict`: idempotency key reused with a different payload
+- `500 Internal Server Error`: unexpected server failure
+
+### `GET /api/expenses`
+
+Returns the current list of expenses.
+
+**Query parameters**
+
+- `category`: filters expenses by category
+
+Example:
+
+```text
+/api/expenses?category=food
+```
+
+**Behavior**
+
+- Returns expenses from the in-memory store
+- Sorts expenses by date in descending order by default
+- Supports category-based filtering
+
+**Response codes**
+
+- `200 OK`: expenses returned successfully
+
+## Project Structure
+
+- `/app`
+  Contains the Next.js App Router pages and API route handlers, including the main UI page and the `/api/expenses` backend route.
+- `/components`
+  Contains reusable React components such as the expense form and expense list.
+- `/lib`
+  Contains supporting application logic, including the in-memory expense store and idempotency handling.
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -89,3 +163,11 @@ Bruno request files for the API are available in the local Bruno collection dire
 
 - Live app: `https://johnvesslyalti-fenmo-expense-tracker.vercel.app`
 - Repository: `https://github.com/johnvesslyalti/fenmo-expense-tracker`
+
+## Future Improvements
+
+- Replace the in-memory store with PostgreSQL for durable expense persistence across deployments and restarts.
+- Move idempotency tracking into Redis or a durable database-backed table to support multi-instance serverless execution more reliably.
+- Add pagination, search, and richer filtering to better handle larger datasets.
+- Introduce authentication and user-scoped expense data for multi-user support.
+- Improve frontend UX with optimistic updates, toasts, better empty states, and more polished error and retry flows.
